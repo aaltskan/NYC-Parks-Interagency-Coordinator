@@ -1,28 +1,44 @@
 <!DOCTYPE html>
 <html>
   <head>
+    
+    <!-- The title of the page, the name that appears in the tab -->
     <title>NYC Parks Interagency Coordinator</title>
+
+    <!-- This is something that seems to be standard in most codes, sets up what characters can be read -->
     <meta charset="utf-8" />
-    <!-- For full screen Leaflet maps, add the following meta tag to set parameters in the viewport-->
+    <!-- For full screen Leaflet maps, the following meta tag sets the parameters in the viewport, making it full screen and scaled and not scalable-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <!-- Including Leaflet CSS -->
+    
+    <!-- THE SECTION BELOW IS WHERE WE LINK ALL THE CSS FILES -->
+    
+    <!-- Leaflet CSS -->
     <link type="text/css" rel="stylesheet" href="libraries/leaflet-1.2/leaflet.css"/>
-    <!-- Including our custom CSS -->
+    <!-- Skeleton CSS -->
+    <link type="text/css" rel="stylesheet" href="libraries/Skeleton-2.0.4 2/css/skeleton.css"/>
+    <!-- Our Custom CSS -->
     <link type="text/css" rel="stylesheet" href="css/stylesheet.css"/>
+
   </head>
+
+    <!-- THE BODY OF THE PAGE -->
+
   <body>
+    <!-- since we have the map and a list, we need to create two separate divs for them -->
   	<div id="map"></div>
     <div id="list"></div>
   </body>
-  <!-- Including Leaflet Javascript Library -->
-  <script type="text/javascript" src="libraries/leaflet-1.2/leaflet.js"></script>
-  <!-- Including jQuery -->
-  <script type="text/javascript" src="libraries/jQuery/jquery-1.11.2.min.js"></script>
-  <!-- Including d3.js -->
-  <script type="text/javascript" src="libraries/d3/d3.min.js"></script>
-  <!-- Including undescore.js -->
-  <script type="text/javascript" src="libraries/underscore/underscore-min.js"></script>
 
-  <!-- Including our custom Javascript -->  
+    <!-- BELOW IS WHERE YOU LINK THE JAVASCRIPT FILES -->
+
+  <!-- The Leaflet Javascript Library -->
+  <script type="text/javascript" src="libraries/leaflet-1.2/leaflet.js"></script>
+  <!-- The jQuery Library-->
+  <script type="text/javascript" src="libraries/jQuery/jquery-1.11.2.min.js"></script>
+  <!-- The d3.js Library-->
+  <script type="text/javascript" src="libraries/d3/d3.min.js"></script>
+  <!-- The undescore.js Library-->
+  <script type="text/javascript" src="libraries/underscore/underscore-min.js"></script>
+  <!-- Our custom Javascript -->  
   <script type="text/javascript" src="js/script.js"></script>
 </html>

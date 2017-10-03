@@ -1,33 +1,32 @@
-// This script demonstrates some simple things one can do with leaflet.js
+//First, we set the map location
+var map = L.map('map').setView([40.7128,-74.0059], 10.4);
 
-
-var map = L.map('map').setView([40.65,-73.93], 12);
-
-// set a tile layer to be CartoDB tiles 
+//Then, set the base map, in this case, the CartoDB light tiles; and includes the credits 
 var CartoDBTiles = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{
-  attribution: 'Map Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> Contributors, Map Tiles &copy; <a href="http://cartodb.com/attributions">CartoDB</a>'
+  attribution: 'Map Data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> Contributors, Map Tiles &copy; <a href="http://cartodb.com/attributions">CartoDB</a>, JD Godchaux'
 });
 
-// add these tiles to our map
+// Then, add the base map tiles to the map, notice how we first set the tiles as a "var" above, and that includes all the link, down here we simply call on the "var."
 map.addLayer(CartoDBTiles);
 
-// set data layer as global variable so we can use it in the layer control below
-var acsGeoJSON;
+// set global variables for our data (just the GeoJSON for now); this will help use it in the layer controls below
+var ParksPropertiesGeoJSON;
 
-// use jQuery get geoJSON to grab geoJson layer, parse it, then plot it on the map using the plotDataset function
-$.getJSON( "data/acs_data_joined.geojson", function( data ) {
+// use jQuery's  getJSON function to grab the geoJson layer, parse it, then plot it on the map using the plotDataset function
+$.getJSON( "data/ParksProperties.geojson", function( data ) {
     var dataset = data;
     // draw the dataset on the map
     plotDataset(dataset);
     //create the sidebar with links to fire polygons on the map
     createListForClick(dataset);
 });
+//so far so good, then everything starts getting confusing...
 
 // function to plot the dataset passed to it
 function plotDataset(dataset) {
-    acsGeoJSON = L.geoJson(dataset, {
-        style: acsStyle,
-        onEachFeature: acsOnEachFeature
+    ParksPropertiesGeoJSON = L.geoJson(dataset, {
+        style: ParksPropertiesStyle,
+        onEachFeature: ParksPropertiesOnEachFeature
     }).addTo(map);
 
     // create layer controls
@@ -35,8 +34,8 @@ function plotDataset(dataset) {
 }
 
 // function that sets the style of the geojson layer
-var acsStyle = function (feature, latlng) {
-
+var ParksPropertiesStyle = function (feature, latlng) {
+    
     var calc = calculatePercentage(feature);
 
     var style = {
@@ -65,11 +64,7 @@ function calculatePercentage(feature) {
 // function that fills polygons with color based on the data
 function fillColorPercentage(d) {
     return d > 9 ? '#006d2c' :
-           d > 7 ? '#31a354' :
-           d > 5 ? '#74c476' :
-           d > 3 ? '#a1d99b' :
-           d > 1 ? '#c7e9c0' :
-                   '#edf8e9';
+                   '#94bc85';
 }
 
 // function that sets the fillOpacity of layers -- if % is 0 then make polygons transparent
@@ -85,20 +80,20 @@ var popup = new L.Popup();
 var count = 0;
 
 // on each feature function that loops through the dataset, binds popups, and creates a count
-var acsOnEachFeature = function(feature,layer){
+var ParksPropertiesOnEachFeature = function(feature,layer){
     var calc = calculatePercentage(feature);
 
     // let's bind some feature properties to a pop up with an .on("click", ...) command. We do this so we can fire it both on and off the map
     layer.on("click", function (e) {
         var bounds = layer.getBounds();
-        var popupContent = "<strong>Total Population:</strong> " + calc.denominator + "<br /><strong>Population Moved to US in Last Year:</strong> " + calc.numerator + "<br /><strong>Percentage Moved to US in Last Year:</strong> " + calc.percentage + "%";
+        var popupContent = "<strong>Name:</strong> " + feature.properties.NAME311 + "<br /><strong>Parks District:</strong> " + feature.properties.DEPARTMENT + "<br /><strong>Type:</strong> " + feature.properties.TYPECATEGO;
         popup.setLatLng(bounds.getCenter());
         popup.setContent(popupContent);
         map.openPopup(popup);
     });
 
     // we'll now add an ID to each layer so we can fire the popup outside of the map
-    layer._leaflet_id = 'acsLayerID' + count;
+    layer._leaflet_id = 'ParksPropertiesLayerID' + count;
     count++;
 
 }
@@ -111,45 +106,13 @@ function createLayerControls(){
     };
 
     var overlayMaps = {
-        "Percentage Moved to US in Last Year": acsGeoJSON,
+        "CLASS": ParksPropertiesGeoJSON,
     };
 
     // add control
     L.control.layers(baseMaps, overlayMaps).addTo(map);
     
 }
-
-
-
-
-// add in a legend to make sense of it all
-// create a container for the legend and set the location
-
-var legend = L.control({position: 'bottomright'});
-
-// using a function, create a div element for the legend and return that div
-legend.onAdd = function (map) {
-
-    // a method in Leaflet for creating new divs and setting classes
-    var div = L.DomUtil.create('div', 'legend'),
-        amounts = [0, 1, 3, 5, 7, 9];
-
-        div.innerHTML += '<p>Percentage Population<br />That Moved to US in<br />the Last Year</p>';
-
-        for (var i = 0; i < amounts.length; i++) {
-            div.innerHTML +=
-                '<i style="background:' + fillColorPercentage(amounts[i] + 1) + '"></i> ' +
-                amounts[i] + (amounts[i + 1] ? '% &ndash;' + amounts[i + 1] + '%<br />' : '% +<br />');
-        }
-
-    return div;
-};
-
-
-// add the legend to the map
-legend.addTo(map);
-
-
 
 // function to create a list in the right hand column with links that will launch the pop-ups on the map
 function createListForClick(dataset) {
@@ -170,96 +133,87 @@ function createListForClick(dataset) {
         .enter()
         .append("li")
         .html(function(d) { 
-            return '<a href="#">' + d.properties.ACS_13_5YR_B07201_GEOdisplay_label + '</a>'; 
+            return '<a href="#">' + d.properties.NAME311 + '</a>'; 
         })
         .on('click', function(d, i) {
-            console.log(d.properties.ACS_13_5YR_B07201_HD02_VD01);
+            console.log(d.properties.NAME311);
             console.log(i);
-            var leafletId = 'acsLayerID' + i;
+            var leafletId = 'ParksPropertiesLayerID' + i;
             map._layers[leafletId].fire('click');
         });
 
 
 }
 
-
+// AMMON - DONT WORRY ABOUT ANYTHING BELOW THIS
 // lets add data from the API now
 // set a global variable to use in the D3 scale below
 // use jQuery geoJSON to grab data from API
-$.getJSON( "https://data.cityofnewyork.us/resource/erm2-nwe9.json?$$app_token=rQIMJbYqnCnhVM9XNPHE9tj0g&borough=BROOKLYN&complaint_type=Noise&status=Open", function( data ) {
-    var dataset = data;
-    // draw the dataset on the map
-    plotAPIData(dataset);
+// $.getJSON( "https://data.cityofnewyork.us/resource/erm2-nwe9.json?$$app_token=rQIMJbYqnCnhVM9XNPHE9tj0g&borough=BROOKLYN&complaint_type=Noise&status=Open", function( data ) {
+//     var dataset = data;
+//     // draw the dataset on the map
+//     plotAPIData(dataset);
 
-});
+// });
 
-// create a leaflet layer group to add your API dots to so we can add these to the map
-var apiLayerGroup = L.layerGroup();
+// // create a leaflet layer group to add your API dots to so we can add these to the map
+// var apiLayerGroup = L.layerGroup();
 
-// since these data are not geoJson, we have to build our dots from the data by hand
-function plotAPIData(dataset) {
-    // set up D3 ordinal scle for coloring the dots just once
-    var ordinalScale = setUpD3Scale(dataset);
+// // since these data are not geoJson, we have to build our dots from the data by hand
+// function plotAPIData(dataset) {
+//     // set up D3 ordinal scle for coloring the dots just once
+//     var ordinalScale = setUpD3Scale(dataset);
     
-console.log(ordinalScale("Noise, Barking Dog (NR5)"));
+// console.log(ordinalScale("Noise, Barking Dog (NR5)"));
 
 
-    // loop through each object in the dataset and create a circle marker for each one using a jQuery for each loop
-    $.each(dataset, function( index, value ) {
+//     // loop through each object in the dataset and create a circle marker for each one using a jQuery for each loop
+//     $.each(dataset, function( index, value ) {
 
-        // check to see if lat or lon is undefined or null
-        if ((typeof value.latitude !== "undefined" || typeof value.longitude !== "undefined") || (value.latitude && value.longitude)) {
-            // create a leaflet lat lon object to use in L.circleMarker
-            var latlng = L.latLng(value.latitude, value.longitude);
+//         // check to see if lat or lon is undefined or null
+//         if ((typeof value.latitude !== "undefined" || typeof value.longitude !== "undefined") || (value.latitude && value.longitude)) {
+//             // create a leaflet lat lon object to use in L.circleMarker
+//             var latlng = L.latLng(value.latitude, value.longitude);
      
-            var apiMarker = L.circleMarker(latlng, {
-                stroke: false,
-                fillColor: ordinalScale(value.descriptor),
-                fillOpacity: 1,
-                radius: 5
-            });
+//             var apiMarker = L.circleMarker(latlng, {
+//                 stroke: false,
+//                 fillColor: ordinalScale(value.descriptor),
+//                 fillOpacity: 1,
+//                 radius: 5
+//             });
 
-            // bind a simple popup so we know what the noise complaint is
-            apiMarker.bindPopup(value.descriptor);
+//             // bind a simple popup so we know what the noise complaint is
+//             apiMarker.bindPopup(value.descriptor);
 
-            // add dots to the layer group
-            apiLayerGroup.addLayer(apiMarker);
+//             // add dots to the layer group
+//             apiLayerGroup.addLayer(apiMarker);
 
-        }
+//         }
 
-    });
+//     });
 
-    apiLayerGroup.addTo(map);
+//     apiLayerGroup.addTo(map);
 
-}
+// }
 
-function setUpD3Scale(dataset) {
-    //console.log(dataset);
-    // create unique list of descriptors
-    // first we need to create an array of descriptors
-    var descriptors = [];
+// function setUpD3Scale(dataset) {
+//     //console.log(dataset);
+//     // create unique list of descriptors
+//     // first we need to create an array of descriptors
+//     var descriptors = [];
 
-    // loop through descriptors and add to descriptor array
-    $.each(dataset, function( index, value ) {
-        descriptors.push(value.descriptor);
-    });
+//     // loop through descriptors and add to descriptor array
+//     $.each(dataset, function( index, value ) {
+//         descriptors.push(value.descriptor);
+//     });
 
-    // use underscore to create a unique array
-    var descriptorsUnique = _.uniq(descriptors);
+//     // use underscore to create a unique array
+//     var descriptorsUnique = _.uniq(descriptors);
 
-    // create a D3 ordinal scale based on that unique array as a domain
-    var ordinalScale = d3.scale.category20()
-        .domain(descriptorsUnique);
+//     // create a D3 ordinal scale based on that unique array as a domain
+//     var ordinalScale = d3.scale.category20()
+//         .domain(descriptorsUnique);
 
-    return ordinalScale;
+//     return ordinalScale;
 
-}
-
-
-
-
-
-
-
-
-
+// }
