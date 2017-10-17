@@ -1,0 +1,20 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #FFFFFF;
+}
+
+#map {
+    height: calc(100vh);
+}
+
+#SideBar{
+    height: calc(100vh);
+    background-color: #FFFFFF;
+    background-image: url("https://upload.wikimedia.org/wikipedia/en/thumb/e/ed/Logo_of_the_New_York_City_Department_of_Parks_%26_Recreation.svg/906px-Logo_of_the_New_York_City_Department_of_Parks_%26_Recreation.svg.png");
+}
+
+.SideBarStyle{
+    margin-top: 10px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
